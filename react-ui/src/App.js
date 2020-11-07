@@ -54,6 +54,8 @@ function App() {
       .then(response => {
         setLoading(false)
         setAddNew(false)
+        setContactName('')
+        setContactPhone('')
         setActivePage(1)
       })
   }
