@@ -42,7 +42,20 @@ function App() {
   }
 
   const onClickSubmit = () => {
-
+    setLoading(true)
+    fetch(baseUri, {
+      method: 'post',
+      body: JSON.stringify({
+        name: contactName,
+        phone: contactPhone
+      })
+    })
+      .then(response => response.json())
+      .then(response => {
+        setLoading(false)
+        setAddNew(false)
+        setActivePage(1)
+      })
   }
 
   return (
@@ -117,7 +130,7 @@ function App() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setAddNew(false)}>Cancel</Button>
-          <Button variant="primary" onClick={onClickSubmit}>Submit</Button>
+          <Button variant="primary" onClick={onClickSubmit} disabled={contactName === '' || contactPhone === ''}>Submit</Button>
         </Modal.Footer>
       </Modal>
     </>
