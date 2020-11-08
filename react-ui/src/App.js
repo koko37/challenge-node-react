@@ -19,15 +19,20 @@ function App() {
   const baseUri = "http://localhost:5000/contacts"
 
   useEffect(() => {
-    setLoading(true)
-
-    fetch(`${baseUri}?page=${activePage}&search=${searchKey}`)
-      .then(response => response.json())
-      .then(response => {
+    let mounted = true
+    const fetchData = async () => {
+      const res = await fetch(`${baseUri}?page=${activePage}&search=${searchKey}`)
+      const response = await res.json()
+      if (mounted) {
         setLoading(false)
         setPageCount(response.last_page)
         setContacts(response.data)
-      })
+      }
+    }
+
+    setLoading(true)
+    fetchData()
+    return () => mounted = false
   }, [activePage, searchKey, refreshFlag])
 
   const pagination = (pageSize, active) => {
@@ -42,25 +47,22 @@ function App() {
     return items
   }
 
-  const onClickSubmit = () => {
+  const onClickSubmit = async () => {
     setLoading(true)
 
-    fetch(`${baseUri}/${activeContact.id}`, {
+    const res = await fetch(`${baseUri}/${activeContact.id}`, {
       method: 'post',
       body: JSON.stringify({
         name: activeContact.name,
         phone: activeContact.phone
       })
     })
-      .then(response => response.json())
-      .then(response => {
-        setLoading(false)
+    const response = await res.json()
+    setLoading(false)
 
-        setUpdateModalVisible(false)
-        setActiveContact({})
-        setActivePage(1)
-        setRefreshFlag(!refreshFlag)
-      })
+    setUpdateModalVisible(false)
+    setActiveContact({})
+    setRefreshFlag(!refreshFlag)
   }
 
   const openUpdate = (contact) => {
@@ -111,7 +113,7 @@ function App() {
                     <td>{ contact.id }</td>
                     <td>{ contact.name }</td>
                     <td>{ contact.phone }</td>
-                    <td><Button variant="primary" size="sm" onClick={() => openUpdate(contact)}>Update</Button></td>
+                    <td><Button variant="primary" size="sm" onClick={() => openUpdate(contact)} id={`btn-update-${contact.id}`}>Update</Button></td>
                   </tr>
                 ))
               }
