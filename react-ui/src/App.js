@@ -69,12 +69,13 @@ function App() {
               <BounceLoader size={24} loading={loading} />
             </div>
             <div className="d-flex align-items-center col-sm-4">
-              <Button variant="primary" className="mr-2" onClick={() => setAddNew(true)}>Add</Button>
-              <InputGroup className="rounded-circle">
+              <Button variant="primary" className="mr-2" onClick={() => setAddNew(true)} id="btn-add">Add</Button>
+              <InputGroup className="rounded-circle" id="search-box">
                 <InputGroup.Prepend>
                   <InputGroup.Text id="searchIcon"><img src={searchIcon} alt="search" width="24" height="24" /></InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control
+                  id="input-search"
                   type="text"
                   className="text-center"
                   placeholder="Search"
@@ -88,7 +89,7 @@ function App() {
             </div>
         </Row>
         <Row>
-          <Table striped hover>
+          <Table striped hover id="tbl-contacts">
             <thead>
               <tr>
                 <th>Name</th>
