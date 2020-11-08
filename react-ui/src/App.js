@@ -12,11 +12,12 @@ function App() {
   const [pageCount, setPageCount] = useState(0)
   const [activePage, setActivePage] = useState(1)
 
-  const [addNew, setAddNew] = useState(false)
-  const [contactName, setContactName] = useState('')
-  const [contactPhone, setContactPhone] = useState('')
+  const [updateModalVisible, setUpdateModalVisible] = useState(false)
+  const [activeContact, setActiveContact] = useState({})
+  const [refreshFlag, setRefreshFlag] = useState(false)
 
   const baseUri = "http://localhost:5000/contacts"
+
   useEffect(() => {
     setLoading(true)
 
@@ -27,7 +28,7 @@ function App() {
         setPageCount(response.last_page)
         setContacts(response.data)
       })
-  }, [activePage, searchKey])
+  }, [activePage, searchKey, refreshFlag])
 
   const pagination = (pageSize, active) => {
     let items = [];
@@ -43,21 +44,28 @@ function App() {
 
   const onClickSubmit = () => {
     setLoading(true)
-    fetch(baseUri, {
+
+    fetch(`${baseUri}/${activeContact.id}`, {
       method: 'post',
       body: JSON.stringify({
-        name: contactName,
-        phone: contactPhone
+        name: activeContact.name,
+        phone: activeContact.phone
       })
     })
       .then(response => response.json())
       .then(response => {
         setLoading(false)
-        setAddNew(false)
-        setContactName('')
-        setContactPhone('')
+
+        setUpdateModalVisible(false)
+        setActiveContact({})
         setActivePage(1)
+        setRefreshFlag(!refreshFlag)
       })
+  }
+
+  const openUpdate = (contact) => {
+    setActiveContact(contact)
+    setUpdateModalVisible(true)
   }
 
   return (
@@ -69,7 +77,6 @@ function App() {
               <BounceLoader size={24} loading={loading} />
             </div>
             <div className="d-flex align-items-center col-sm-4">
-              <Button variant="primary" className="mr-2" onClick={() => setAddNew(true)} id="btn-add">Add</Button>
               <InputGroup className="rounded-circle" id="search-box">
                 <InputGroup.Prepend>
                   <InputGroup.Text id="searchIcon"><img src={searchIcon} alt="search" width="24" height="24" /></InputGroup.Text>
@@ -92,18 +99,21 @@ function App() {
           <Table striped hover id="tbl-contacts">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Name</th>
                 <th>Phone</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               { contacts.map((contact, id) => (
                   <tr key={id}>
+                    <td>{ contact.id }</td>
                     <td>{ contact.name }</td>
                     <td>{ contact.phone }</td>
+                    <td><Button variant="primary" size="sm" onClick={() => openUpdate(contact)}>Update</Button></td>
                   </tr>
-                  )
-                )
+                ))
               }
             </tbody>
           </Table>
@@ -115,25 +125,28 @@ function App() {
         </Row>
       </Container>
 
-      <Modal show={addNew} onHide={() => setAddNew(false)}>
+      <Modal show={updateModalVisible} onHide={() => setUpdateModalVisible(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Add new contact</Modal.Title>
+          <Modal.Title>Update contact</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group>
+              <Form.Label>ID: {activeContact.id}</Form.Label>
+            </Form.Group>
+            <Form.Group>
               <Form.Label>Name</Form.Label>
-              <Form.Control type="text" placeholder="Name" value={contactName} onChange={(e) => setContactName(e.target.value)}/>
+              <Form.Control type="text" placeholder="Name" value={activeContact.name || ''} onChange={(e) => setActiveContact({...activeContact, name: e.target.value})}/>
             </Form.Group>
             <Form.Group>
               <Form.Label>Phone</Form.Label>
-              <Form.Control type="text" placeholder="Phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)}/>
+              <Form.Control type="text" placeholder="Phone" value={activeContact.phone || ''} onChange={(e) => setActiveContact({...activeContact, phone: e.target.value})}/>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setAddNew(false)}>Cancel</Button>
-          <Button variant="primary" onClick={onClickSubmit} disabled={contactName === '' || contactPhone === ''}>Submit</Button>
+          <Button variant="secondary" onClick={() => setUpdateModalVisible(false)}>Cancel</Button>
+          <Button variant="primary" onClick={onClickSubmit} disabled={activeContact.name === '' || activeContact.phone === ''}>Submit</Button>
         </Modal.Footer>
       </Modal>
     </>

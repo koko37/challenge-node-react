@@ -29,7 +29,8 @@ function prepareMockDate (count) {
   for(var i = 0; i < count; i++) {
     var contact = {
       name: faker.name.findName(),
-      phone: faker.phone.phoneNumber()
+      phone: faker.phone.phoneNumber(),
+      id: i
     }
     data.push(contact)
   }
